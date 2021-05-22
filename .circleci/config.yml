@@ -51,14 +51,13 @@ jobs:
           destination: reports
       - store_test_results: # テスト サマリー (https://circleci.com/ja/docs/2.0/collect-test-data/) に表示されるようにします
           path: app/build/test-results
-      - slack/fail:
+      - slack/notify:
+          channel: ga-field
+          event: pass
+      - slack/notify:
           channel: ga-field
           event: fail
-          templete: basic_fail_1
-      - slack/success:
-          channel: ga-field
-          event: success
-          templete: basic_success_1
+      
 
       # デプロイの構成例は https://circleci.com/ja/docs/2.0/deployment-integrations/ を参照してください
 
