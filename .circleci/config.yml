@@ -21,13 +21,13 @@ jobs:
       - android/run-tests:
           test-command: ./gradlew lint testDebug --continue
       - run:
-          name: テストの実行
-          command: ./gradlew lint test
-            - store_artifacts:
-                path: app/build/reports
-                destination: reports
-            - store_test_results:
-                path: app/build/test-results
+        name: テストの実行
+        command: ./gradlew lint test
+      - store_artifacts:
+          path: app/build/reports
+          destination: reports
+      - store_test_results:
+          path: app/build/test-results
       # TODO UITestする時になったら修正する
       # Then start the emulator and run the Instrumentation tests!
 #      - android/start-emulator-and-run-tests:
