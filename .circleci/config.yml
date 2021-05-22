@@ -23,10 +23,10 @@ jobs:
       - run:
           name: テストの実行
           command: ./gradlew lint test
-            - store_artifacts: # アーティファクト (https://circleci.com/ja/docs/2.0/artifacts/) に表示されるようにします
+            - store_artifacts:
                 path: app/build/reports
                 destination: reports
-            - store_test_results: # テスト サマリー (https://circleci.com/ja/docs/2.0/collect-test-data/) に表示されるようにします
+            - store_test_results:
                 path: app/build/test-results
       # TODO UITestする時になったら修正する
       # Then start the emulator and run the Instrumentation tests!
