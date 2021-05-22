@@ -20,11 +20,19 @@ jobs:
       # The next step will run the unit tests
       - android/run-tests:
           test-command: ./gradlew lint testDebug --continue
-
+      - run:
+          name: テストの実行
+          command: ./gradlew lint test
+            - store_artifacts: # アーティファクト (https://circleci.com/ja/docs/2.0/artifacts/) に表示されるようにします
+                path: app/build/reports
+                destination: reports
+            - store_test_results: # テスト サマリー (https://circleci.com/ja/docs/2.0/collect-test-data/) に表示されるようにします
+                path: app/build/test-results
+      # TODO UITestする時になったら修正する
       # Then start the emulator and run the Instrumentation tests!
-      - android/start-emulator-and-run-tests:
-          test-command: ./gradlew connectedDebugAndroidTest
-          system-image: system-images;android-27;google_apis;x86
+#      - android/start-emulator-and-run-tests:
+#          test-command: ./gradlew connectedDebugAndroidTest
+#          system-image: system-images;android-27;google_apis;x86
 
       # And finally run the release build
       - run:
