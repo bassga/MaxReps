@@ -3,8 +3,9 @@
 version: 2.1
 
 ## Orbs are reusable packages of CircleCI configuration that you may share across projects, enabling you to create encapsulated, parameterized commands, jobs, and executors that can be used across multiple projects.
-#orbs:
-#  android: circleci/android@1.0.3
+orbs:
+  android: circleci/android@1.0.3
+  slack: circleci/slack@4.1
 
 workflows:
   my-workflow:
@@ -40,7 +41,7 @@ jobs:
             - ~/.gradle
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
       - run:
-          name: テストの実行
+          name: Lintテストの実行
           command: ./gradlew lint test
       - run:
           name: debugTest
@@ -50,6 +51,15 @@ jobs:
           destination: reports
       - store_test_results: # テスト サマリー (https://circleci.com/ja/docs/2.0/collect-test-data/) に表示されるようにします
           path: app/build/test-results
+      - slack/fail:
+          channel: ga-field
+          event: fail
+          templete: basic_fail_1
+      - slack/success:
+          channel: ga-field
+          event: success
+          templete: basic_success_1
+
       # デプロイの構成例は https://circleci.com/ja/docs/2.0/deployment-integrations/ を参照してください
 
 #workflows:
