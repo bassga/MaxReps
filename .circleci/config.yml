@@ -11,7 +11,7 @@ workflows:
     jobs:
       - build:
           context:
-            - build-env-vars
+            - ga-field
             - docker-hub-creds
 
 jobs:
