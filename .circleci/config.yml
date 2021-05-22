@@ -15,31 +15,36 @@ jobs:
         auth:
           username: bassga
           password: $DOCKERHUB_PASSWORD  # コンテキスト/プロジェクト UI 環境変数の参照
-    environment:
-      JVM_OPTS: -Xmx3200m
     steps:
       - checkout
-      - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
-      #      - run:
-      #         name: Chmod パーミッション #Gradlew Dependencies のパーミッションが失敗する場合は、これを使用します
-      #         command: sudo chmod +x ./gradlew
       - run:
-          name: 依存関係のダウンロード
-          command: ./gradlew androidDependencies
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
-      - run:
-          name: テストの実行
-          command: ./gradlew lint test
-      - store_artifacts: # アーティファクト (https://circleci.com/ja/docs/2.0/artifacts/) に表示されるようにします
-          path: app/build/reports
-          destination: reports
-      - store_test_results: # テスト サマリー (https://circleci.com/ja/docs/2.0/collect-test-data/) に表示されるようにします
-          path: app/build/test-results
-      # デプロイの構成例は https://circleci.com/ja/docs/2.0/deployment-integrations/ を参照してください
+          name: "echo environment variables from org-global context"
+          command: echo $MY_ENV_VAR
+#    environment:
+#      JVM_OPTS: -Xmx3200m
+#    steps:
+#      - checkout
+#      - restore_cache:
+#          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+#      #      - run:
+#      #         name: Chmod パーミッション #Gradlew Dependencies のパーミッションが失敗する場合は、これを使用します
+#      #         command: sudo chmod +x ./gradlew
+#      - run:
+#          name: 依存関係のダウンロード
+#          command: ./gradlew androidDependencies
+#      - save_cache:
+#          paths:
+#            - ~/.gradle
+#          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+#      - run:
+#          name: テストの実行
+#          command: ./gradlew lint test
+#      - store_artifacts: # アーティファクト (https://circleci.com/ja/docs/2.0/artifacts/) に表示されるようにします
+#          path: app/build/reports
+#          destination: reports
+#      - store_test_results: # テスト サマリー (https://circleci.com/ja/docs/2.0/collect-test-data/) に表示されるようにします
+#          path: app/build/test-results
+#      # デプロイの構成例は https://circleci.com/ja/docs/2.0/deployment-integrations/ を参照してください
 
 #workflows:
 #  # Below is the definition of your workflow.
