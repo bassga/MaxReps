@@ -19,7 +19,7 @@ jobs:
   build:
     working_directory: ~/code
     docker:
-      - image: circleci/android:api-30-alpha
+      - image: circleci/android:api-29
         auth:
           username: bassga
           password: $DOCKERHUB_PASSWORD  # コンテキスト/プロジェクト UI 環境変数の参照
