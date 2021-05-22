@@ -42,6 +42,9 @@ jobs:
       - run:
           name: テストの実行
           command: ./gradlew lint test
+      - run:
+          name: debugTest
+          command: ./gradlew testDebug
       - store_artifacts: # アーティファクト (https://circleci.com/ja/docs/2.0/artifacts/) に表示されるようにします
           path: app/build/reports
           destination: reports
