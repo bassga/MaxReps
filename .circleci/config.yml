@@ -2,41 +2,170 @@
 # See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
-# Orbs are reusable packages of CircleCI configuration that you may share across projects, enabling you to create encapsulated, parameterized commands, jobs, and executors that can be used across multiple projects.
+## Orbs are reusable packages of CircleCI configuration that you may share across projects, enabling you to create encapsulated, parameterized commands, jobs, and executors that can be used across multiple projects.
 orbs:
   android: circleci/android@1.0.3
+  slack: circleci/slack@4.4.2
+
+workflows:
+  my-workflow:
+    jobs:
+      - build:
+          context:
+            - ga-field
+            - docker-hub-creds
 
 jobs:
   # Below is the definition of your job to build and test your app, you can rename and customize it as you want.
-  build-and-test:  
-    # These next lines define the Android machine image executor: https://circleci.com/docs/2.0/executor-types/
-    executor:
-      name: android/android-machine
-
+  build:
+    working_directory: ~/code
+    docker:
+      - image: circleci/android:api-29
+        auth:
+          username: bassga
+          password: $DOCKERHUB_PASSWORD  # コンテキスト/プロジェクト UI 環境変数の参照
+    environment:
+      JVM_OPTS: -Xmx3200m
     steps:
-      # Checkout the code as the first step.
       - checkout
-
-      # The next step will run the unit tests
-      - android/run-tests:
-          test-command: ./gradlew lint testDebug --continue
-
-      # Then start the emulator and run the Instrumentation tests!
-      - android/start-emulator-and-run-tests:
-          test-command: ./gradlew connectedDebugAndroidTest
-          system-image: system-images;android-27;google_apis;x86
-
-      # And finally run the release build
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
       - run:
-          name: Assemble release build
-          command: |
-            ./gradlew assembleRelease    
+          name: 依存関係のダウンロード
+          command: ./gradlew androidDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+      - run:
+          name: Lintテストの実行
+          command: ./gradlew lint test
+      - run:
+          name: debugTest
+          command: ./gradlew testDebug
+      - store_artifacts: # アーティファクト (https://circleci.com/ja/docs/2.0/artifacts/) に表示されるようにします
+          path: app/build/reports
+          destination: reports
+      - store_test_results: # テスト サマリー (https://circleci.com/ja/docs/2.0/collect-test-data/) に表示されるようにします
+          path: app/build/test-results
+      - notify_slack_pass
+      - notify_slack_fail
+      
+commands:
+  notify_slack_pass:
+    steps:
+      - slack/notify:
+          event: pass
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":tada::tada::tada: *Success!*"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Project:*\n${CIRCLE_PROJECT_REPONAME}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*When:*\n$(TZ=Asia/Tokyo date +'%Y/%m/%d %T')"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Job:*\n${CIRCLE_JOB}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Author:*\n${CIRCLE_USERNAME}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch:*\n${CIRCLE_BRANCH}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Tag:*\n${CIRCLE_TAG}"
+                    }
+                  ]
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Job"
+                      },
+                      "url": "${CIRCLE_BUILD_URL}"
+                    }
+                  ]
+                }
+              ]
+            }
 
-workflows:
-  # Below is the definition of your workflow.
-  # Inside the workflow, you provide the jobs you want to run, e.g this workflow runs the build-and-test job above.
-  # CircleCI will run this workflow on every commit.
-  # For more details on extending your workflow, see the configuration docs: https://circleci.com/docs/2.0/configuration-reference/#workflows
-  sample: 
-    jobs:
-      - build-and-test
+  notify_slack_fail:
+    steps:
+      - slack/notify:
+          event: fail
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":japanese_ogre::japanese_ogre::japanese_ogre: *Failed* :bangbang:"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Project:*\n${CIRCLE_PROJECT_REPONAME}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*When:*\n$(TZ=Asia/Tokyo date +'%Y/%m/%d %T')"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Job:*\n${CIRCLE_JOB}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Author:*\n${CIRCLE_USERNAME}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch:*\n${CIRCLE_BRANCH}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Tag:*\n${CIRCLE_TAG}"
+                    }
+                  ]
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Job"
+                      },
+                      "url": "${CIRCLE_BUILD_URL}"
+                    }
+                  ]
+                }
+              ]
+            }
