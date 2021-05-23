@@ -51,29 +51,124 @@ jobs:
           destination: reports
       - store_test_results: # テスト サマリー (https://circleci.com/ja/docs/2.0/collect-test-data/) に表示されるようにします
           path: app/build/test-results
-      - notify-passed
-      - notify-failed
+      - notify_slack_pass
+      - notify_slack_fail
       
 commands:
-  notify-passed:
+  notify_slack_pass:
     steps:
       - slack/notify:
-          channel: circleci_notify
           event: pass
-          template: basic_pass_1
-  notify-failed:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":tada::tada::tada: *Success!*"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Project:*\n${CIRCLE_PROJECT_REPONAME}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*When:*\n$(TZ=Asia/Tokyo date +'%Y/%m/%d %T')"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Job:*\n${CIRCLE_JOB}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Author:*\n${CIRCLE_USERNAME}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch:*\n${CIRCLE_BRANCH}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Tag:*\n${CIRCLE_TAG}"
+                    }
+                  ]
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Job"
+                      },
+                      "url": "${CIRCLE_BUILD_URL}"
+                    }
+                  ]
+                }
+              ]
+            }
+
+  notify_slack_fail:
     steps:
       - slack/notify:
-          channel: circleci_notify
           event: fail
-          template: basic_fail_1
-      # デプロイの構成例は https://circleci.com/ja/docs/2.0/deployment-integrations/ を参照してください
-
-#workflows:
-#  # Below is the definition of your workflow.
-#  # Inside the workflow, you provide the jobs you want to run, e.g this workflow runs the build-and-test job above.
-#  # CircleCI will run this workflow on every commit.
-#  # For more details on extending your workflow, see the configuration docs: https://circleci.com/docs/2.0/configuration-reference/#workflows
-#  sample:
-#    jobs:
-#      - build-and-test
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":japanese_ogre::japanese_ogre::japanese_ogre: *Failed* :bangbang:"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Project:*\n${CIRCLE_PROJECT_REPONAME}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*When:*\n$(TZ=Asia/Tokyo date +'%Y/%m/%d %T')"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Job:*\n${CIRCLE_JOB}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Author:*\n${CIRCLE_USERNAME}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch:*\n${CIRCLE_BRANCH}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Tag:*\n${CIRCLE_TAG}"
+                    }
+                  ]
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Job"
+                      },
+                      "url": "${CIRCLE_BUILD_URL}"
+                    }
+                  ]
+                }
+              ]
+            }
