@@ -52,16 +52,22 @@ jobs:
           destination: reports
       - store_test_results: # テスト サマリー (https://circleci.com/ja/docs/2.0/collect-test-data/) に表示されるようにします
           path: app/build/test-results
+      - notify-passed
+      - notify-failed
+      
+commands:
+  notify-passed:
+    steps:
       - slack/notify:
           channel: C01N14W0927
           event: pass
           template: basic_pass_1
+  notify-failed:
+    steps:
       - slack/notify:
           channel: C01N14W0927
           event: fail
           template: basic_fail_1
-      
-
       # デプロイの構成例は https://circleci.com/ja/docs/2.0/deployment-integrations/ を参照してください
 
 #workflows:
