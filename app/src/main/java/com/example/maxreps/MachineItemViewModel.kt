@@ -14,6 +14,7 @@ class MachineItemViewModel : ViewModel() {
     fun init() {
         createList()
     }
+
     private fun createList() {
         var testList = mutableListOf<DummyContent.DummyItem>()
         repeat(20) {
