@@ -20,7 +20,7 @@ object DummyContent {
      */
     private val ITEM_MAP: MutableMap<String, DummyItem> = HashMap()
 
-    private val COUNT = 25
+    private const val COUNT = 25
 
     init {
         // Add some sample items.

@@ -10,7 +10,6 @@ class MachineItemViewModel : ViewModel() {
     private val _list: MutableLiveData<MutableList<DummyContent.DummyItem>> = MutableLiveData()
     val list: LiveData<MutableList<DummyContent.DummyItem>> = _list
 
-
     fun init() {
         createList()
     }
